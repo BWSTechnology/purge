@@ -1,9 +1,9 @@
 package com.bwstechnology.purge;
 
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,16 +14,15 @@ import android.app.Activity;
 
 public class TextAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
-    public ArrayList toDoListItems = new ArrayList();
+    public ArrayList<ListItem> toDoListItems = new ArrayList<ListItem>();
     private Activity mainActivity;
 
     public TextAdapter(Activity mainActivity) {
     	this.mainActivity = mainActivity;
         mInflater = (LayoutInflater) this.mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        for (int i = 0; i < 20; i++) {
-            ListItem listItem = new ListItem();
-            toDoListItems.add(listItem);
-        }
+        ListItem listItem = new ListItem();
+        toDoListItems.add(listItem);
+        toDoListItems.add(listItem);
         notifyDataSetChanged();
     }
 
@@ -81,62 +80,48 @@ public class TextAdapter extends BaseAdapter {
 
     public View getView(int position, View convertView, ViewGroup parent) {
         TextFieldContainer textFieldContainer;
-        // create new view
-        if (convertView == null) {
-            textFieldContainer = new TextFieldContainer();
-            // load item.xml-layout
-            convertView = mInflater.inflate(R.layout.item, null);
-            textFieldContainer.editTextField = (EditText) convertView.findViewById(R.id.ContentField);
-            //convertView.setTag(holder);
-        } else {
-            textFieldContainer = (TextFieldContainer) convertView.getTag();
-        }
-
-        //we need to update adapter once we finish with editing
         try
         {
-	        textFieldContainer.editTextField.setOnFocusChangeListener
-	        (
-	        		new OnFocusChangeListener()
-			        {
-			            public void onFocusChange(View v, boolean hasFocus)
-			            {
-			                if (!hasFocus)
-			                {
-			                    final int position = v.getId();
-			                    final EditText Caption = (EditText) v;
-			                    //???????
-			                    //toDoListItems.get(position) = Caption.getText().toString();
-			                }
-			            }
-			        }
-	        );
+            // create new view
+	        if (convertView == null) {
+	            textFieldContainer = new TextFieldContainer();
+	            // load item.xml-layout
+	            convertView = mInflater.inflate(R.layout.item, null);
+	            // get visual representation from container and put it to the element
+	            textFieldContainer.editTextField = (EditText) convertView.findViewById(R.id.ContentField);
+	        } else {
+	            textFieldContainer = (TextFieldContainer) convertView.getTag();
+	        }
+	
+	        //we need to update adapter (save data) once we finish with editing
+	        
+	        /*
+		    textFieldContainer.editTextField.setOnFocusChangeListener
+		    (
+		    		new OnFocusChangeListener()
+				    {
+		    			public void onFocusChange(View v, boolean hasFocus)
+				        {
+		    				if (!hasFocus)
+				            {
+		    					int editTextId = v.getId();
+				                EditText editTextField = (EditText) v;
+				                //String editTextFieldContent = editTextField.
+				                //toDoListItems.get(position) = Caption.getText().toString();
+				            }
+				        }
+				    }
+		    );*/
+        }
+        catch (InflateException inflateException)
+        {
+        	System.out.println("InflateException in TextAdapter, getView()" + "\n" + inflateException.getMessage());
         }
         catch(Exception exp)
         {
-        	System.out.println("Exception in TextAdapter, getView()");
+        	System.out.println("Exception in TextAdapter, getView()" + "\n" + exp.getMessage());
         }
 
         return convertView;
     }
-    
-    /***
-     * Saves the content of the listview to an internal file
-     * @param ctx
-     */
-    /*
-    public void saveData(Context ctx)
-    {
-    	String filename = "myfile";
-    	String string = "Hello world!";
-    	FileOutputStream outputStream;
-
-    	try {
-    		outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
-    		outputStream.write(string.getBytes());
-    		outputStream.close();
-    	} catch (Exception e) {
-    	  e.printStackTrace();
-    	}
-    }*/
 }
