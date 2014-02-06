@@ -1,5 +1,5 @@
 package com.bwstechnology.purge;
 
 class ListItem {
-    String caption;
+    //String caption;
 }

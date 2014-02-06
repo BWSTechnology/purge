@@ -11,18 +11,22 @@ import android.view.View.OnFocusChangeListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.app.Activity;
+import android.text.*;
 
 public class TextAdapter extends BaseAdapter {
-    private LayoutInflater mInflater;
-    public ArrayList<ListItem> toDoListItems = new ArrayList<ListItem>();
+    public LayoutInflater layoutInflater;
+    //public ArrayList<ListItem> arrayListListItems = new ArrayList<ListItem>();
+    public ArrayList<ListItemFragmentViewHolder> arrayListListItems = new ArrayList<ListItemFragmentViewHolder>();
     private Activity mainActivity;
+    public ListItemFragmentViewHolder listItemFragment;
 
     public TextAdapter(Activity mainActivity) {
     	this.mainActivity = mainActivity;
-        mInflater = (LayoutInflater) this.mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ListItem listItem = new ListItem();
-        toDoListItems.add(listItem);
-        toDoListItems.add(listItem);
+        layoutInflater = (LayoutInflater) this.mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        //ListItem listItem = new ListItem();
+        ListItemFragmentViewHolder listItemFragment = new ListItemFragmentViewHolder(mainActivity);
+        arrayListListItems.add(listItemFragment);
+        arrayListListItems.add(listItemFragment);
         notifyDataSetChanged();
     }
 
@@ -34,7 +38,7 @@ public class TextAdapter extends BaseAdapter {
     	
     	try
     	{
-    		size = toDoListItems.size();
+    		size = arrayListListItems.size();
     	}
     	catch (Exception exp)
     	{
@@ -79,39 +83,20 @@ public class TextAdapter extends BaseAdapter {
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        TextFieldContainer textFieldContainer;
         try
         {
             // create new view
 	        if (convertView == null) {
-	            textFieldContainer = new TextFieldContainer();
+	            listItemFragment = new ListItemFragmentViewHolder(mainActivity);
 	            // load item.xml-layout
-	            convertView = mInflater.inflate(R.layout.item, null);
+	            convertView = layoutInflater.inflate(R.layout.item, null);
 	            // get visual representation from container and put it to the element
-	            textFieldContainer.editTextField = (EditText) convertView.findViewById(R.id.ContentField);
+	            listItemFragment.editTextField = (EditText) convertView.findViewById(R.id.ContentField);
+	            EditTextWatcher textWatcher = new EditTextWatcher(this, position, convertView, mainActivity);
+	            listItemFragment.editTextField.addTextChangedListener(textWatcher);
 	        } else {
-	            textFieldContainer = (TextFieldContainer) convertView.getTag();
+	            listItemFragment = (ListItemFragmentViewHolder) convertView.getTag();
 	        }
-	
-	        //we need to update adapter (save data) once we finish with editing
-	        
-	        /*
-		    textFieldContainer.editTextField.setOnFocusChangeListener
-		    (
-		    		new OnFocusChangeListener()
-				    {
-		    			public void onFocusChange(View v, boolean hasFocus)
-				        {
-		    				if (!hasFocus)
-				            {
-		    					int editTextId = v.getId();
-				                EditText editTextField = (EditText) v;
-				                //String editTextFieldContent = editTextField.
-				                //toDoListItems.get(position) = Caption.getText().toString();
-				            }
-				        }
-				    }
-		    );*/
         }
         catch (InflateException inflateException)
         {
