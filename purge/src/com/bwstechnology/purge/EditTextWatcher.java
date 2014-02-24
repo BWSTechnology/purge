@@ -35,33 +35,10 @@ public class EditTextWatcher implements TextWatcher
     { 
     	// if typing text in last textbox (afterTextChanged),
     	// insert a new one below (inflate new edittext fragment - pure editext xml)
-    	/*
+    	this.textAdapter.isExternalStorageWritable();
+    	
         if (position == this.textAdapter.arrayListListItems.size()-1)
         {   
-        	//this.mainActivity.getCurrentFocus().getClass();
-        	
-        	View focusedView = this.mainActivity.getWindow().getCurrentFocus();
-        	Class focusedClass = focusedView.getClass();
-        	if (focusedClass.equals(android.widget.EditText.class))
-        	{
-        		EditText editText = (EditText)focusedView;
-        		ViewParent parentView = editText.getParent();
-        		
-        		//if (parentView.equals(android.widget.ListView.class))
-        		//{
-        			ListView listView = (ListView)parentView;
-        			listView.getSelectedItemPosition();
-        		//}
-        	}
-        	ListView toDoList = (ListView) this.mainActivity.findViewById(R.id.ToDoListView);
-            
-            int previousSelectedIndex;
-            // Get the current selected index
-            if (toDoList.isSelected())
-            	previousSelectedIndex = toDoList.getSelectedItemPosition();
-        	
-        	
-        	
         	ListItemFragmentViewHolder listItemFragment = new ListItemFragmentViewHolder(mainActivity);
         	this.textAdapter.arrayListListItems.add(listItemFragment);
             this.textAdapter.notifyDataSetChanged();
@@ -69,13 +46,9 @@ public class EditTextWatcher implements TextWatcher
             // load item.xml-layout
             convertView = this.textAdapter.layoutInflater.inflate(R.layout.item, null);
             // get visual representation from container and put it to the element
+            this.textAdapter.listItemFragment = listItemFragment;
             this.textAdapter.listItemFragment.editTextField = (EditText) convertView.findViewById(R.id.ContentField);
-            //EditTextWatcher textWatcher = new EditTextWatcher(textAdapter, position, convertView, mainActivity);
-            //this.textAdapter.listItemFragment.editTextField.addTextChangedListener(textWatcher);
-            //this.textAdapter.arrayListListItems.get(this.textAdapter.arrayListListItems.size()-1).editTextField.requestFocus();
-            
-            toDoList.setSelection(1);
-        }*/
+        }
     }
 
     public void onTextChanged(CharSequence s, int start, int before, int count) { }
