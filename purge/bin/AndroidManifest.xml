@@ -32,7 +32,7 @@
             android:label="@string/title_activity_sava_data" >
         </activity>
         <activity
-            android:name="com.bwstechnology.purge.SaveDataActivity"
+            android:name="com.bwstechnology.purge.LoadDataActivity"
             android:label="@string/title_activity_save_data" >
         </activity>
     </application>
