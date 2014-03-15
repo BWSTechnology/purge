@@ -11,11 +11,8 @@ import java.io.PrintWriter;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
-import android.view.GestureDetector;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +21,14 @@ import android.widget.LinearLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
  
-public class MainActivity extends Activity implements OnGestureListener, TextWatcher{
+public class MainActivity extends Activity implements View.OnTouchListener, TextWatcher{
     private LinearLayout toDoList;
-    //private TextAdapter myAdapter;
-    private GestureDetector mGestureDetector;
     private int position = 0;
- 
+    
+    static final int MIN_DISTANCE = 10;
+    private float downX, downY, upX, upY;
+    
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -39,16 +38,14 @@ public class MainActivity extends Activity implements OnGestureListener, TextWat
 	 
 	    if (!this.loadData())
 	    {
-		    // get list view, set some properties and bind data source to it
-		    toDoList = (LinearLayout) findViewById(R.id.linearLayout);
+	    	toDoList = (LinearLayout) findViewById(R.id.linearLayout);
 		    
 		    EditText text1 = new EditText(this);
 		    text1.addTextChangedListener(this);
-		    
+		    text1.setOnTouchListener(this);
+		    		    
 		    toDoList.addView(text1);
 	    }
-	    
-	    mGestureDetector = new GestureDetector(this, this);
     }
     
     @Override
@@ -68,6 +65,11 @@ public class MainActivity extends Activity implements OnGestureListener, TextWat
     
     public void beforeTextChanged(CharSequence s, int start, int count, int after)
     {
+    	
+    }
+    
+    public void onTextChanged(CharSequence s, int start, int before, int count)
+    { 
     	if (this.isExternalStorageWritable())
     	{
 	    	LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
@@ -78,14 +80,12 @@ public class MainActivity extends Activity implements OnGestureListener, TextWat
 	        {   
 	        	EditText text1 = new EditText(this);
 	    	    text1.addTextChangedListener(this);
-	    	    
-	    	    //toDoList.addView(text1);
+	    	    text1.setOnTouchListener(this);
+	    	    	    	    
 	    	    linearLayout.addView(text1);
 	        }
     	}
     }
-    
-    public void onTextChanged(CharSequence s, int start, int before, int count) { }
     
     public View getView(int position, View convertView, ViewGroup parent) {
     	this.position = position;
@@ -110,34 +110,36 @@ public class MainActivity extends Activity implements OnGestureListener, TextWat
     	File directory = Environment.getExternalStorageDirectory();
 		try
 		{
-			File dir = new File(directory.getAbsolutePath() + "/download");
-	        dir.mkdirs();
-	        File file = new File(dir, "myData.txt");
-	        try {
-	        	BufferedReader br = new BufferedReader(new FileReader(file));
-	            String line;
-	            
-	            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
-	            
-	            while ((line = br.readLine()) != null) {
-	            	EditText text1 = new EditText(this);
-	            	text1.setText(line);
-	        	    text1.addTextChangedListener(this);
-	        	    
-	        	    linearLayout.addView(text1);
-	            }
-	            
-	            /*for (int i = 0; i < linearLayout.getChildCount(); i++)
-	            {
-	            	
-	                //this.listItemFragment.editTextField = (EditText) convertView.findViewById(R.id.ContentField);
-	            }*/
-	            br.close();
-	            fileLoaded = true;
-	        } catch (FileNotFoundException e) {
-	            e.printStackTrace();
-	        } catch (IOException e) {
-	            e.printStackTrace();
+			File dir = new File(directory.getAbsolutePath() + "/Documents");
+	        //dir.mkdirs();
+	        if (dir != null)
+	        {
+				File file = new File(dir, "purgeData.txt");
+		        if (file != null)
+		        {
+					try {
+			        	BufferedReader br = new BufferedReader(new FileReader(file));
+			            String line;
+			            
+			            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
+			            
+			            while ((line = br.readLine()) != null) {
+			            	EditText text1 = new EditText(this);
+			            	text1.setText(line);
+			        	    text1.addTextChangedListener(this);
+			        	    text1.setOnTouchListener(this);
+			        	    
+			        	    linearLayout.addView(text1);
+			            }
+			            
+			            br.close();
+			            fileLoaded = true;
+			        } catch (FileNotFoundException e) {
+			            e.printStackTrace();
+			        } catch (IOException e) {
+			            e.printStackTrace();
+			        }
+		        }
 	        }
 		}
 		catch(Exception exp)
@@ -150,48 +152,44 @@ public class MainActivity extends Activity implements OnGestureListener, TextWat
     private void writeData()
     {
     		File directory = Environment.getExternalStorageDirectory();
-    		try
+    		if (directory != null)
     		{
-    			File dir = new File(directory.getAbsolutePath() + "/download");
-    	        dir.mkdirs();
-    	        File file = new File(dir, "myData.txt");
-    	        try {
-    	            FileOutputStream f = new FileOutputStream(file);
-    	            PrintWriter pw = new PrintWriter(f);
-    	            
-    	            // get listview view
-    	            // for each edittext, get text
-    	            
-    	            LinearLayout linerLayout = (LinearLayout) findViewById(R.id.linearLayout);
-    	            for (int i = 0; i < linerLayout.getChildCount(); i++)
-    	            {
-    	            	EditText editText = (EditText) linerLayout.getChildAt(i);
-    	            	//editText.getText();
-    	            	// write value
-    		    		pw.println(editText.getText().toString());
-    	            }
-    	            
-    	            /*
-    		    	for (int i = 0; i < arrayListListItems.size(); i++)
-    	            {
-    		    		// write value
-    		    		pw.println(arrayListListItems.get(i).editTextField.getText().toString());
-    		    	}
-    		    	*/
-    	            pw.flush();
-    	            pw.close();
-    	            f.close();
-    	        } catch (FileNotFoundException e) {
-    	            e.printStackTrace();
-    	        } catch (IOException e) {
-    	            e.printStackTrace();
-    	        }
-    		}
-    		catch(Exception exp)
-    		{
+	    		try
+	    		{
+	    			File dir = new File(directory.getAbsolutePath() + "/Documents");
+	    	        //dir.mkdirs();
+	    	        File file = new File(dir, "purgeData.txt");
+	    	        if (dir != null)
+	    	        {
+		    	        try {
+		    	            FileOutputStream f = new FileOutputStream(file);
+		    	            PrintWriter pw = new PrintWriter(f);
+		    	            
+		    	            LinearLayout linerLayout = (LinearLayout) findViewById(R.id.linearLayout);
+		    	            for (int i = 0; i < linerLayout.getChildCount(); i++)
+		    	            {
+		    	            	EditText editText = (EditText) linerLayout.getChildAt(i);
+		    	            	// write value
+		    		    		pw.println(editText.getText().toString());
+		    	            }
+		    	            
+		    	            pw.flush();
+		    	            pw.close();
+		    	            f.close();
+		    	        } catch (FileNotFoundException e) {
+		    	            e.printStackTrace();
+		    	        } catch (IOException e) {
+		    	            e.printStackTrace();
+		    	        }
+	    	        }
+	    		}
+	    		catch(Exception exp)
+	    		{
+	    		}
     		}
     }
     
+    /*
     public boolean onOptionsItemSelected(MenuItem item)
     {
     	switch(item.getItemId()) {
@@ -205,58 +203,85 @@ public class MainActivity extends Activity implements OnGestureListener, TextWat
 
         return true;
     }
+    */
+    
+    public void onLeftToRightSwipe(float fingerX, float fingerY){
+    	
+    	LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
+        for (int i=0; i < linearLayout.getChildCount()-1; i++){
+            EditText editor = (EditText)linearLayout.getChildAt(i);
+            
+            int[] location = new int[2];
+            editor.getLocationOnScreen(location);
+            int editorHeight = editor.getMeasuredHeight();
+            int editorY = location[1];
+            
+            if (fingerY > editorY && fingerY < editorY + editorHeight)
+            {
+            	//touch is within this child
+            	editor.getText().toString();
+            	if (linearLayout.getChildCount() > 1)
+            	{
+            		linearLayout.removeView(editor);
+            		// save data
+            		this.isExternalStorageWritable();
+            		return;
+            	}
+            	else
+            	{
+            		// do not delete last element but clear text else no way to add new items!
+            		editor.setText("");
+            		// save data
+            		this.isExternalStorageWritable();
+            		return;
+            	}
+            }
+        }
+    }
 
-	@Override
-	public boolean onDown(MotionEvent e) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    public boolean onTouch(View v, MotionEvent event) {
+    	System.out.println(event.getAction());
+        switch(event.getAction()){
+            case MotionEvent.ACTION_DOWN: {
+                downX = event.getRawX();
+            	downY = event.getRawY();
+                return false;
+            }
+            case MotionEvent.ACTION_UP: {
+                upX = event.getRawX();
+                upY = event.getRawY();
 
-	@Override
-	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-			float velocityY) {
-		// TODO Auto-generated method stub
-		//Defining Sensitivity
-		float sensitivity = 50;
-		//Swipe Right Check
-		if(e2.getX() - e1.getX() > sensitivity)
-		{
-			//remove edittext from view
-			//ListView listView = (ListView) findViewById(R.id.ToDoListView);
-			
-			return true;
-		}
-		return false;
-	}
+                float deltaX = downX - upX;
+                float deltaY = downY - upY;
 
-	@Override
-	public void onLongPress(MotionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+                // swipe horizontal?
+                if(Math.abs(deltaX) > MIN_DISTANCE)
+                {
+                    // left or right
+                    if(deltaX < 0)
+                    { 
+                    	this.onLeftToRightSwipe(upX, upY);
+                    	return false;
+                    }
+                    //if(deltaX > 0) { this.onRightToLeftSwipe(); return true;}
+                }
+                else {
+                        return false; // We don't consume the event
+                }
 
-	@Override
-	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
-			float distanceY) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+                // swipe vertical?
+                if(Math.abs(deltaY) > MIN_DISTANCE){
+                    // top or down
+                    //if(deltaY < 0) { this.onTopToBottomSwipe(); return true; }
+                    //if(deltaY > 0) { this.onBottomToTopSwipe(); return true; }
+                }
+                else {
+                        return false; // We don't consume the event
+                }
 
-	@Override
-	public void onShowPress(MotionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean onSingleTapUp(MotionEvent e) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public boolean onTouchEvent(MotionEvent event)
-	{
-		mGestureDetector.onTouchEvent(event);
-		return false;
-	}
+                return false;
+            }
+        }
+        return false;
+    }
 }

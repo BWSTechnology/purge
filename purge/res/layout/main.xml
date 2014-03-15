@@ -7,8 +7,3 @@
 	    android:layout_height="match_parent">
 	</LinearLayout>
 </ScrollView>
-
-<!-- <ListView android:id="@+id/ToDoListView" android:layout_height="fill_parent"
-        android:layout_width="fill_parent" android:descendantFocusability="beforeDescendants"
-        >
-    </ListView>  -->
