@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MotionEvent;
@@ -24,6 +25,7 @@ import android.text.TextWatcher;
 public class MainActivity extends Activity implements View.OnTouchListener, TextWatcher{
     private LinearLayout toDoList;
     private int position = 0;
+    private final String NAMESPACE_NAME = "com.bwstechnology.purge";
     
     static final int MIN_DISTANCE = 10;
     private float downX, downY, upX, upY;
@@ -101,6 +103,10 @@ public class MainActivity extends Activity implements View.OnTouchListener, Text
         	writeData();
             return true;
         }
+        else
+        {
+        	Log.e(NAMESPACE_NAME, "isExternalStorageWritable() : " + "state of the current primary external storage: " + state);
+        }
         return false;
     }
     
@@ -108,85 +114,128 @@ public class MainActivity extends Activity implements View.OnTouchListener, Text
     {
     	boolean fileLoaded = false;
     	File directory = Environment.getExternalStorageDirectory();
-		try
-		{
-			File dir = new File(directory.getAbsolutePath() + "/Documents");
-	        //dir.mkdirs();
-	        if (dir != null)
-	        {
-				File file = new File(dir, "purgeData.txt");
-		        if (file != null)
+    	if (directory != null)
+    	{
+    		try
+			{
+				File dir = new File(directory.getAbsolutePath() + "/Documents");
+		        if (dir != null)
 		        {
-					try {
-			        	BufferedReader br = new BufferedReader(new FileReader(file));
-			            String line;
-			            
-			            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
-			            
-			            while ((line = br.readLine()) != null) {
-			            	EditText text1 = new EditText(this);
-			            	text1.setText(line);
-			        	    text1.addTextChangedListener(this);
-			        	    text1.setOnTouchListener(this);
-			        	    
-			        	    linearLayout.addView(text1);
-			            }
-			            
-			            br.close();
-			            fileLoaded = true;
-			        } catch (FileNotFoundException e) {
-			            e.printStackTrace();
-			        } catch (IOException e) {
-			            e.printStackTrace();
+		        	File file = new File(dir, "purgeData.txt");
+			        if (file != null)
+			        {
+			        	try {
+				        	BufferedReader br = new BufferedReader(new FileReader(file));
+				            String line;
+				            
+				            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
+				            
+				            while ((line = br.readLine()) != null) {
+				            	EditText text1 = new EditText(this);
+				            	text1.setText(line);
+				        	    text1.addTextChangedListener(this);
+				        	    text1.setOnTouchListener(this);
+				        	    
+				        	    linearLayout.addView(text1);
+				            }
+				            
+				            br.close();
+				            fileLoaded = true;
+				        } catch (FileNotFoundException e) {
+				            e.printStackTrace();
+				        } catch (IOException e) {
+				            e.printStackTrace();
+				        }
+			        }
+			        else
+			        {
+			        	Log.e(NAMESPACE_NAME, "loadData() : " + "failed getting file object for data file");
 			        }
 		        }
-	        }
-		}
-		catch(Exception exp)
-		{
-		}
+		        else
+		        {
+		        	Log.e(NAMESPACE_NAME, "loadData() :"  + "failed getting directory absolute path to Documents");
+		        }
+			}
+			catch(NullPointerException nullPointerException)
+			{
+				Log.e(NAMESPACE_NAME, "loadData() :" + nullPointerException.getMessage());
+			}
+			catch(Exception exp)
+			{
+				Log.e(NAMESPACE_NAME, "loadData() : " + exp.getMessage());
+			}
+    	}
+    	else
+    	{
+    		Log.e(NAMESPACE_NAME, "loadData() : " + "failed getting primary external storage directory");
+    	}
 		return fileLoaded;
     }
 
+    private void writeLogFile()
+    {
+    	try
+    	{
+    	    File file = new File(Environment.getExternalStorageDirectory(), "purgeLog" + String.valueOf(System.currentTimeMillis()));
+    	    Runtime.getRuntime().exec("logcat -v time -f " + file.getAbsolutePath() + " com.bwstechnology.purge:I *:F");
+    	}
+    	catch (IOException e)
+    	{
+    		System.out.println(e.getMessage());
+    	}
+    }
     
     private void writeData()
     {
-    		File directory = Environment.getExternalStorageDirectory();
-    		if (directory != null)
-    		{
-	    		try
-	    		{
-	    			File dir = new File(directory.getAbsolutePath() + "/Documents");
-	    	        //dir.mkdirs();
-	    	        File file = new File(dir, "purgeData.txt");
-	    	        if (dir != null)
-	    	        {
-		    	        try {
-		    	            FileOutputStream f = new FileOutputStream(file);
-		    	            PrintWriter pw = new PrintWriter(f);
+    	File directory = Environment.getExternalStorageDirectory();
+    	if (directory != null)
+    	{
+	    	try
+	    	{
+	    		File dir = new File(directory.getAbsolutePath() + "/Documents");
+	    	    //dir.mkdirs();
+	    	    File file = new File(dir, "purgeData.txt");
+	    	    if (dir != null)
+	    	    {
+		    	    try
+		    	    {
+		    	        FileOutputStream f = new FileOutputStream(file);
+		    	        PrintWriter pw = new PrintWriter(f);
 		    	            
-		    	            LinearLayout linerLayout = (LinearLayout) findViewById(R.id.linearLayout);
-		    	            for (int i = 0; i < linerLayout.getChildCount(); i++)
-		    	            {
-		    	            	EditText editText = (EditText) linerLayout.getChildAt(i);
-		    	            	// write value
-		    		    		pw.println(editText.getText().toString());
-		    	            }
-		    	            
-		    	            pw.flush();
-		    	            pw.close();
-		    	            f.close();
-		    	        } catch (FileNotFoundException e) {
-		    	            e.printStackTrace();
-		    	        } catch (IOException e) {
-		    	            e.printStackTrace();
+		    	        LinearLayout linerLayout = (LinearLayout) findViewById(R.id.linearLayout);
+		    	        for (int i = 0; i < linerLayout.getChildCount(); i++)
+		    	        {
+		    	        	EditText editText = (EditText) linerLayout.getChildAt(i);
+		    	            // write value
+		    		    	pw.println(editText.getText().toString());
 		    	        }
-	    	        }
-	    		}
-	    		catch(Exception exp)
-	    		{
-	    		}
-    		}
+		    	            
+		    	        pw.flush();
+		    	        pw.close();
+		    	        f.close();
+		    	    }
+		    	    catch (FileNotFoundException e)
+		    	    {
+		    	    	Log.e(NAMESPACE_NAME, "writeData() : " + "FileNotFoundException, " + e.getMessage());
+		    	    	e.printStackTrace();
+		    	    }
+		    	    catch (IOException e)
+		    	    {
+		    	    	Log.e(NAMESPACE_NAME, "writeData() : " + "IOException, " + e.getMessage());
+		    	    	e.printStackTrace();
+		    	    }
+	    	    }
+	    	}
+	    	catch(Exception exp)
+	    	{
+	    		Log.e(NAMESPACE_NAME, "writeData() : " + "failed getting Documents directory or creating data file");
+	    	}
+    	}
+    	else
+    	{
+    		Log.e(NAMESPACE_NAME, "writeData() : " + "failed getting primary external storage directory");
+    	}
     }
     
     /*
@@ -283,5 +332,15 @@ public class MainActivity extends Activity implements View.OnTouchListener, Text
             }
         }
         return false;
+    }
+    
+    public void onStop()
+    {
+    	writeLogFile();
+    }
+    
+    public void onDestroy()
+    {
+    	writeLogFile();
     }
 }
