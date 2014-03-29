@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.text.Editable;
 import android.text.TextWatcher;
  
@@ -133,7 +134,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Text
 				        	    
 				        	    linearLayout.addView(text1);
 				            }
-				            
+				            linearLayout.getChildAt(linearLayout.getChildCount()-1).requestFocus();
 				            br.close();
 				            fileLoaded = true;
 				        }
